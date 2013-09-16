@@ -83,7 +83,7 @@ foreach my $slave( @slaves ) {
 print "Setting MHA grants on $master->{name}\n";
 foreach my $node( @running_nodes ) {
 	my $grant =<<END;
-mysql -e \\"GRANT ALL ON *.* TO 'mha'\@'$node->{hostname}' IDENTIFIED BY 'mha'\\"
+mysql -e \\"GRANT ALL ON *.* TO 'mha'\@'$node->{ip}' IDENTIFIED BY 'mha'\\"
 END
 	system( "vagrant ssh $master->{name} -c \"$grant\"");
 }
