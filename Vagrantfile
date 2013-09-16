@@ -37,7 +37,7 @@ def build_box( config, name, ip, server_id )
 		}
 
 		provider_virtualbox( node_config, '256' ) { |vb, override|		
-			provision_puppet( override, 'percona_server.pp', 
+			provision_puppet( override, 'mha_node.pp', 
 				node_puppet_config.merge('datadir_dev' => 'dm-2')
 			)
 
@@ -56,8 +56,8 @@ Vagrant.configure("2") do |config|
 	build_box( config, 'd2n2', '192.168.70.5', '4' )
 
 	config.vm.define :manager do |manager_config|
-		manager_config.vm.hostname = 'manager'
-		manager_config.vm.network :private_network, ip: '192.168.70.5'
+		manager_config.vm.hostname = 'mshowanager'
+		manager_config.vm.network :private_network, ip: '192.168.70.6'
 
 		provider_aws( manager_config, 'manager', 'm1.small') { |aws, override|
 			aws.block_device_mapping = [
@@ -72,7 +72,7 @@ Vagrant.configure("2") do |config|
 		}
 
 		provider_virtualbox( manager_config, '256' ) { |vb, override|		
-			provision_puppet( override, 'percona_server.pp', 
+			provision_puppet( override, 'mha_manager.pp', 
 				$puppet_config.merge('datadir_dev' => 'dm-2')
 			)
 
