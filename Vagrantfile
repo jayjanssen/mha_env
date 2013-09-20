@@ -49,7 +49,7 @@ end
 Vagrant.configure("2") do |config|
 	config.vm.box = "centos-6_4-64_percona"
 	config.ssh.username = "root"
-
+	
 	build_box( config, 'd1n1', '192.168.70.2', '1' )
 	build_box( config, 'd1n2', '192.168.70.3', '2' )
 	build_box( config, 'd2n1', '192.168.70.4', '3' )
@@ -58,6 +58,12 @@ Vagrant.configure("2") do |config|
 	config.vm.define :manager do |manager_config|
 		manager_config.vm.hostname = 'mshowanager'
 		manager_config.vm.network :private_network, ip: '192.168.70.6'
+		
+		# Override default ip failover scripts with custom ones
+		manager_puppet_config = $puppet_config.merge( 
+			'master_ip_failover_script' => "/vagrant/mha_failover/master_ip_failover",
+			'master_ip_online_change_script' => "/vagrant/mha_failover/master_ip_online_change"
+		);
 
 		provider_aws( manager_config, 'manager', 'm1.small') { |aws, override|
 			aws.block_device_mapping = [
@@ -67,15 +73,14 @@ Vagrant.configure("2") do |config|
 				}
 			]
 			provision_puppet( override, 'mha_manager.pp', 
-				$puppet_config.merge( 'datadir_dev' => 'xvdb' )
+				manager_puppet_config.merge( 'datadir_dev' => 'xvdb' )
 			)
 		}
 
 		provider_virtualbox( manager_config, '256' ) { |vb, override|		
 			provision_puppet( override, 'mha_manager.pp', 
-				$puppet_config.merge('datadir_dev' => 'dm-2')
+				manager_puppet_config.merge('datadir_dev' => 'dm-2')
 			)
-
 		}
 
 	end
