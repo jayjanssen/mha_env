@@ -24,6 +24,7 @@ use warnings FATAL => 'all';
 
 use Getopt::Long;
 use MHA::DBHelper;
+use MHA::ManagerUtil;
 
 my (
   $command,        $ssh_user,         $orig_master_host,
@@ -102,9 +103,17 @@ sub main {
     exit $exit_code;
   }
   elsif ( $command eq "status" ) {
+	
+	# Hardcode stuff now until the next MHA release passes SSH info in here
+	my @rc = MHA::ManagerUtil::exec_ssh_cmd( $orig_master_ip, '22', "sudo ip addr list | grep 192.168.70.100", undef );
 
-    # do nothing
-    exit 0;
+	if( $rc[0] == 0 ) {
+		print "INFO: VIP 192.168.70.100 found on Master\n";
+	} else {
+		print "CRITICAL: VIP 192.168.70.100 not found on Master!\n";
+		
+	}
+    exit $rc[0];
   }
   else {
     &usage();
